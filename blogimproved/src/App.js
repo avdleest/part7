@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import Blog from './components/Blog'
-import BlogForm from './components/BlogForm'
+import NewBlog from './components/NewBlog'
 import Toggable from './components/Toggable'
 import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import { useField } from './hooks'
 
-const initialBlogState = { title: '', author: '', url: '' }
-
 const App = () => {
   const [blogs, setBlogs] = useState([])
-  const [newBlog, setNewBlog] = useState(initialBlogState)
   const [user, setUser] = useState(null)
   const [username] = useField('text')
   const [password] = useField('password')
@@ -20,7 +17,7 @@ const App = () => {
   useEffect(() => {
     blogService
       .getAll()
-      .then(initialBlogs => setBlogs(initialBlogs.sort((a, b) => (a.likes > b.likes) ? 1 : -1)))
+      .then(blogs => setBlogs(blogs))
 
   }, [])
 
@@ -61,22 +58,13 @@ const App = () => {
 
   const blogFormRef = React.createRef()
 
-  const addBlog = async (e) => {
-    e.preventDefault()
-    blogFormRef.current.toggleVisibility()
-    const blogObject = {
-      title: newBlog.title,
-      author: newBlog.author,
-      url: newBlog.url
-    }
-    const blog = await blogService.create(blogObject)
-    setBlogs(blogs.concat(blog))
-    setNewBlog(initialBlogState)
-    notify(`a new blog ${blog.title} by ${blog.author} added`)
-  }
+  const byLikes = (b1, b2) => b2.likes - b1.likes
 
-  const setNewBlogState = newBlogData => {
-    setNewBlog({ ...newBlog, ...newBlogData })
+  const createBlog = async (blog) => {
+    blogFormRef.current.toggleVisibility()
+    const createdBlog = await blogService.create(blog)
+    setBlogs(blogs.concat(createdBlog))
+    notify(`a new blog ${blog.title} by ${blog.author} added`)
   }
 
   const deleteHandler = async blog => {
@@ -139,11 +127,11 @@ const App = () => {
     <div>
       <p>{user.name} logged in<button type="logout" onClick={handleLogout}>logout</button></p>
       <Toggable buttonLabel="New Blog" ref={blogFormRef}>
-        <BlogForm onChange={setNewBlogState} values={newBlog} onSubmit={addBlog} />
+        <NewBlog createBlog={createBlog} />
       </Toggable>
       <h2>blogs</h2>
       <Notification notification={notification} />
-      {blogs.map(blog =>
+      {blogs.sort(byLikes).map(blog =>
         <Blog key={blog.id}
           blog={blog}
           likeHandler={likeHandler}
