@@ -6,19 +6,18 @@ import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import { useField } from './hooks'
+import { connect } from 'react-redux'
+import { initializeBlogs, createNewBlog, deleteBlog, likeBlog } from './reducers/blogReducer'
 
-const App = () => {
-  const [blogs, setBlogs] = useState([])
+
+const App = (props) => {
   const [user, setUser] = useState(null)
   const [username] = useField('text')
   const [password] = useField('password')
   const [notification, setNotification] = useState({ message: null })
 
   useEffect(() => {
-    blogService
-      .getAll()
-      .then(blogs => setBlogs(blogs))
-
+    props.initializeBlogs()
   }, [])
 
   useEffect(() => {
@@ -61,9 +60,9 @@ const App = () => {
   const byLikes = (b1, b2) => b2.likes - b1.likes
 
   const createBlog = async (blog) => {
+    // TODO: check why the user is undefined directly after creating a blog. This poses problems for liking a blog
     blogFormRef.current.toggleVisibility()
-    const createdBlog = await blogService.create(blog)
-    setBlogs(blogs.concat(createdBlog))
+    props.createNewBlog(blog)
     notify(`a new blog ${blog.title} by ${blog.author} added`)
   }
 
@@ -72,8 +71,7 @@ const App = () => {
       return
     }
     try {
-      await blogService.del(blog.id)
-      setBlogs(blogs.filter(existingBlog => existingBlog.id !== blog.id))
+      props.deleteBlog(blog.id)
     } catch (exception) {
       console.log(exception)
     }
@@ -87,17 +85,9 @@ const App = () => {
 
   const likeHandler = async blog => {
     try {
-      const blogObject = {
-        id: blog.id,
-        title: (blog.title || ''),
-        author: (blog.author || ''),
-        url: (blog.url || ''),
-        likes: (blog.likes || 0) + 1
-      }
-      if (blog.user) blogObject.user = blog.user.id
-      const updatedBlog = await blogService.update(blog.id, blogObject)
-      notify(`blog ${updatedBlog.title} by ${updatedBlog.author} liked!`)
-      setBlogs(blogs.map(blog => blog.id !== updatedBlog.id ? blog : updatedBlog))
+      const liked = props.blogs.find(b => b.id === blog.id)
+      props.likeBlog(liked)
+      notify(`blog ${liked.title} by ${liked.author} liked!`)
     } catch (exception) {
       console.log(exception)
     }
@@ -131,7 +121,7 @@ const App = () => {
       </Toggable>
       <h2>blogs</h2>
       <Notification notification={notification} />
-      {blogs.sort(byLikes).map(blog =>
+      {props.blogs.sort(byLikes).map(blog =>
         <Blog key={blog.id}
           blog={blog}
           likeHandler={likeHandler}
@@ -142,4 +132,20 @@ const App = () => {
   )
 }
 
-export default App
+const mapStateToProps = (state) => {
+  return {
+    blogs: state
+  }
+}
+
+const mapDispatchToProps = {
+  initializeBlogs,
+  createNewBlog,
+  deleteBlog,
+  likeBlog
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(App)
