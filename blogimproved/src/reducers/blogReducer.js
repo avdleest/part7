@@ -46,7 +46,6 @@ export const deleteBlog = (id) => {
 }
 
 export const likeBlog = (blog) => {
-  console.log('the blog user id:', blog.user.id)
   return async (dispatch) => {
     const liked = { ...blog, likes: blog.likes + 1, user: blog.user.id }
     const data = await blogService.update(liked)
@@ -56,42 +55,5 @@ export const likeBlog = (blog) => {
     })
   }
 }
-
-
-// const blogReducer = (state = [], action) => {
-//   switch (action.type) {
-//     case 'VOTE':
-//       const id = action.id
-//       const anecdoteToChange = state.find(a => a.id === id)
-//       const changedAnecdote = {
-//         ...anecdoteToChange,
-//         votes: anecdoteToChange.votes + 1
-//       }
-//       return state.map(a =>
-//         a.id !== id ? a : changedAnecdote
-//       )
-//     case 'NEW_ANECDOTE':
-//       return [...state, action.data]
-//     case 'INIT_ANECDOTES':
-//       return action.data
-//     default:
-//       return state
-//   }
-// }
-
-// export const upVote = (id, currentVote, content) => {
-//   return async dispatch => {
-//     const data = {
-//       votes: currentVote + 1,
-//       content
-//     }
-//     const anecdote = await anecdotesService.update(id, data)
-//     dispatch({
-//       type: 'VOTE',
-//       id: anecdote.id
-//     }
-//     )
-//   }
-// }
 
 export default blogReducer

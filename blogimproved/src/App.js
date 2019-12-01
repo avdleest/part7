@@ -8,13 +8,13 @@ import loginService from './services/login'
 import { useField } from './hooks'
 import { connect } from 'react-redux'
 import { initializeBlogs, createNewBlog, deleteBlog, likeBlog } from './reducers/blogReducer'
+import { setNotification, removeNotification } from './reducers/notificationReducer'
 
 
 const App = (props) => {
   const [user, setUser] = useState(null)
   const [username] = useField('text')
   const [password] = useField('password')
-  const [notification, setNotification] = useState({ message: null })
 
   useEffect(() => {
     props.initializeBlogs()
@@ -75,12 +75,12 @@ const App = (props) => {
     } catch (exception) {
       console.log(exception)
     }
-    notify(`blog ${blog.title} by ${blog.author} removed!`)
+    notify(`blog ${blog.title} by ${blog.author} removed!`, 'error')
   }
 
   const notify = (message, type = 'success') => {
-    setNotification({ message, type })
-    setTimeout(() => setNotification({ message: null }), 10000)
+    props.setNotification({ message, type })
+    setTimeout(() => props.removeNotification(), 10000)
   }
 
   const likeHandler = async blog => {
@@ -120,7 +120,7 @@ const App = (props) => {
         <NewBlog createBlog={createBlog} />
       </Toggable>
       <h2>blogs</h2>
-      <Notification notification={notification} />
+      <Notification />
       {props.blogs.sort(byLikes).map(blog =>
         <Blog key={blog.id}
           blog={blog}
@@ -134,7 +134,8 @@ const App = (props) => {
 
 const mapStateToProps = (state) => {
   return {
-    blogs: state
+    blogs: state.blogs,
+    notification: state.notification
   }
 }
 
@@ -142,7 +143,9 @@ const mapDispatchToProps = {
   initializeBlogs,
   createNewBlog,
   deleteBlog,
-  likeBlog
+  likeBlog,
+  setNotification,
+  removeNotification
 }
 
 export default connect(
