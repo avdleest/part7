@@ -9,12 +9,13 @@ import { useField } from './hooks'
 import { connect } from 'react-redux'
 import { initializeBlogs, createNewBlog, deleteBlog, likeBlog } from './reducers/blogReducer'
 import { setNotification, removeNotification } from './reducers/notificationReducer'
+import { setUser, removeUser } from './reducers/userReducer'
 
 
 const App = (props) => {
-  const [user, setUser] = useState(null)
-  const [username] = useField('text')
-  const [password] = useField('password')
+  // const [user, setUser] = useState(null)
+  const [username, userReset] = useField('text')
+  const [password, passwordReset] = useField('password')
 
   useEffect(() => {
     props.initializeBlogs()
@@ -24,7 +25,7 @@ const App = (props) => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
-      setUser(user)
+      props.setUser(user)
       blogService.setToken(user.token)
     }
   }, [])
@@ -40,19 +41,19 @@ const App = (props) => {
         'loggedBlogappUser', JSON.stringify(user)
       )
       blogService.setToken(user.token)
-      setUser(user)
-      username.reset()
-      password.reset()
+      props.setUser(user)
+      userReset()
+      passwordReset()
     } catch (exception) {
       console.log('wrong credentials')
-      password.reset()
+      passwordReset()
     }
   }
 
   const handleLogout = (event) => {
     event.preventDefault()
     window.localStorage.removeItem('loggedBlogappUser')
-    setUser(null)
+    props.removeUser()
   }
 
   const blogFormRef = React.createRef()
@@ -93,7 +94,7 @@ const App = (props) => {
     }
   }
 
-  if (user === null) {
+  if (props.user === null) {
     return (
       <div>
         <h2>Login</h2>
@@ -115,7 +116,7 @@ const App = (props) => {
 
   return (
     <div>
-      <p>{user.name} logged in<button type="logout" onClick={handleLogout}>logout</button></p>
+      <p>{props.user.name} logged in<button type="logout" onClick={handleLogout}>logout</button></p>
       <Toggable buttonLabel="New Blog" ref={blogFormRef}>
         <NewBlog createBlog={createBlog} />
       </Toggable>
@@ -126,7 +127,7 @@ const App = (props) => {
           blog={blog}
           likeHandler={likeHandler}
           deleteHandler={deleteHandler}
-          user={user} />
+          user={props.user} />
       )}
     </div>
   )
@@ -135,7 +136,8 @@ const App = (props) => {
 const mapStateToProps = (state) => {
   return {
     blogs: state.blogs,
-    notification: state.notification
+    notification: state.notification,
+    user: state.user
   }
 }
 
@@ -145,7 +147,9 @@ const mapDispatchToProps = {
   deleteBlog,
   likeBlog,
   setNotification,
-  removeNotification
+  removeNotification,
+  setUser,
+  removeUser
 }
 
 export default connect(
