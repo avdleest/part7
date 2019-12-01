@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+import { BrowserRouter as Router, Route, Link, Redirect, withRouter } from 'react-router-dom'
 import Blog from './components/Blog'
 import NewBlog from './components/NewBlog'
 import Toggable from './components/Toggable'
 import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import userService from './services/users'
 import { useField } from './hooks'
 import { connect } from 'react-redux'
 import { initializeBlogs, createNewBlog, deleteBlog, likeBlog } from './reducers/blogReducer'
@@ -13,7 +15,6 @@ import { setUser, removeUser } from './reducers/userReducer'
 
 
 const App = (props) => {
-  // const [user, setUser] = useState(null)
   const [username, userReset] = useField('text')
   const [password, passwordReset] = useField('password')
 
@@ -94,6 +95,62 @@ const App = (props) => {
     }
   }
 
+  const BlogList = () =>
+    <div>
+      <Toggable buttonLabel="New Blog" ref={blogFormRef}>
+        <NewBlog createBlog={createBlog} />
+      </Toggable>
+      <h2>blogs</h2>
+      {props.blogs.sort(byLikes).map(blog =>
+        <Blog key={blog.id}
+          blog={blog}
+          likeHandler={likeHandler}
+          deleteHandler={deleteHandler}
+          user={props.user} />
+      )}
+    </div>
+
+  const Users = () => {
+    const [users, setUsers] = useState([])
+
+    useEffect(() => {
+      //TODO: implement some try/catch patterns
+      let isSubscribed = true
+      const getUsers = async () => {
+        const users = await userService.getAll()
+        if (isSubscribed) setUsers(users)
+      }
+      getUsers()
+
+      return () => isSubscribed = false
+
+    }, [])
+
+    return (
+      <div>
+        <h2>Users</h2>
+        <table id='users'>
+          <tbody>
+            <tr>
+              <th></th>
+              <th>Blogs created</th>
+            </tr>
+            {users.map(user =>
+              <tr key={user.id}>
+                <td>
+                  {user.name}
+                </td>
+                <td>
+                  {user.blogs.length}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+
   if (props.user === null) {
     return (
       <div>
@@ -114,21 +171,15 @@ const App = (props) => {
     )
   }
 
+
   return (
     <div>
-      <p>{props.user.name} logged in<button type="logout" onClick={handleLogout}>logout</button></p>
-      <Toggable buttonLabel="New Blog" ref={blogFormRef}>
-        <NewBlog createBlog={createBlog} />
-      </Toggable>
-      <h2>blogs</h2>
-      <Notification />
-      {props.blogs.sort(byLikes).map(blog =>
-        <Blog key={blog.id}
-          blog={blog}
-          likeHandler={likeHandler}
-          deleteHandler={deleteHandler}
-          user={props.user} />
-      )}
+      <Router>
+        <p>{props.user.name} logged in<button type="logout" onClick={handleLogout}>logout</button></p>
+        <Notification />
+        <Route exact path='/' render={() => <BlogList />} />
+        <Route path='/users' render={() => <Users />} />
+      </Router>
     </div>
   )
 }
