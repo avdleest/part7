@@ -11,8 +11,7 @@ const notificationReducer = (state = { message: null }, action) => {
   }
 }
 
-export const setNotification = ({ message, type }) => {
-  console.log(message)
+export const setNotification = (message, type = 'success') => {
   console.log(`set notif called message: ${message} and type: ${type}`)
   return async (dispatch) => {
     dispatch({
@@ -22,14 +21,11 @@ export const setNotification = ({ message, type }) => {
         type
       }
     })
-  }
-}
-
-export const removeNotification = () => {
-  return async (dispatch) => {
-    dispatch({
-      type: 'REMOVE_NOTIFICATION',
-    })
+    setTimeout(() => {
+      dispatch({
+        type: 'REMOVE_NOTIFICATION'
+      })
+    }, 10000)
   }
 }
 

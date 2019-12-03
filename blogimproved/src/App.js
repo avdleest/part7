@@ -10,8 +10,8 @@ import userService from './services/users'
 import { useField } from './hooks'
 import { connect } from 'react-redux'
 import { initializeBlogs, createNewBlog, deleteBlog, likeBlog } from './reducers/blogReducer'
-import { setNotification, removeNotification } from './reducers/notificationReducer'
-import { setUser, removeUser } from './reducers/userReducer'
+import { setNotification } from './reducers/notificationReducer'
+import { setUser, logoutUser } from './reducers/userReducer'
 
 
 const App = (props) => {
@@ -54,7 +54,7 @@ const App = (props) => {
   const handleLogout = (event) => {
     event.preventDefault()
     window.localStorage.removeItem('loggedBlogappUser')
-    props.removeUser()
+    props.logoutUser()
   }
 
   const blogFormRef = React.createRef()
@@ -65,7 +65,7 @@ const App = (props) => {
     // TODO: check why the user is undefined directly after creating a blog. This poses problems for liking a blog
     blogFormRef.current.toggleVisibility()
     props.createNewBlog(blog)
-    notify(`a new blog ${blog.title} by ${blog.author} added`)
+    props.setNotification(`a new blog ${blog.title} by ${blog.author} added`)
   }
 
   const deleteHandler = async blog => {
@@ -77,19 +77,14 @@ const App = (props) => {
     } catch (exception) {
       console.log(exception)
     }
-    notify(`blog ${blog.title} by ${blog.author} removed!`, 'error')
-  }
-
-  const notify = (message, type = 'success') => {
-    props.setNotification({ message, type })
-    setTimeout(() => props.removeNotification(), 10000)
+    props.setNotification(`blog ${blog.title} by ${blog.author} removed!`, 'error')
   }
 
   const likeHandler = async blog => {
     try {
       const liked = props.blogs.find(b => b.id === blog.id)
       props.likeBlog(liked)
-      notify(`blog ${liked.title} by ${liked.author} liked!`)
+      props.setNotification(`blog ${liked.title} by ${liked.author} liked!`)
     } catch (exception) {
       console.log(exception)
     }
@@ -198,9 +193,8 @@ const mapDispatchToProps = {
   deleteBlog,
   likeBlog,
   setNotification,
-  removeNotification,
   setUser,
-  removeUser
+  logoutUser
 }
 
 export default connect(
