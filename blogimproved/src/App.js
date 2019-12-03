@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Link, Redirect, withRouter } from 'reac
 import BlogList from './components/BlogList'
 import Notification from './components/Notification'
 import Users from './components/Users'
+import User from './components/User'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import { useField } from './hooks'
@@ -57,6 +58,8 @@ const App = (props) => {
     props.logoutUser()
   }
 
+  const userById = (id) => props.users.find(user => user.id === id)
+
   if (props.user === null) {
     return (
       <div>
@@ -83,7 +86,8 @@ const App = (props) => {
         <p>{props.user.name} logged in<button type="logout" onClick={handleLogout}>logout</button></p>
         <Notification />
         <Route exact path='/' render={() => <BlogList />} />
-        <Route path='/users' render={() => <Users />} />
+        <Route exact path='/users' render={() => <Users />} />
+        <Route exact path='/users/:id' render={({ match }) => <User user={userById(match.params.id)} />} />
       </Router>
     </div>
   )
@@ -93,6 +97,7 @@ const mapStateToProps = (state) => {
   return {
     notification: state.notification,
     user: state.user,
+    users: state.allUsers
   }
 }
 
