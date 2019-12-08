@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Link, Redirect, withRouter } from 'reac
 import BlogList from './components/BlogList'
 import Notification from './components/Notification'
 import Users from './components/Users'
+import Blog from './components/Blog'
 import User from './components/User'
 import blogService from './services/blogs'
 import loginService from './services/login'
@@ -60,6 +61,8 @@ const App = (props) => {
 
   const userById = (id) => props.users.find(user => user.id === id)
 
+  const blogById = (id) => props.blogs.find(blog => blog.id === id)
+
   if (props.user === null) {
     return (
       <div>
@@ -88,6 +91,7 @@ const App = (props) => {
         <Route exact path='/' render={() => <BlogList />} />
         <Route exact path='/users' render={() => <Users />} />
         <Route exact path='/users/:id' render={({ match }) => <User user={userById(match.params.id)} />} />
+        <Route exact path='/blogs/:id' render={({ match }) => <Blog user={props.user} blog={blogById(match.params.id)} />} />
       </Router>
     </div>
   )
@@ -97,7 +101,8 @@ const mapStateToProps = (state) => {
   return {
     notification: state.notification,
     user: state.user,
-    users: state.allUsers
+    users: state.allUsers,
+    blogs: state.blogs
   }
 }
 

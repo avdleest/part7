@@ -1,59 +1,66 @@
-import React, { useState } from 'react'
-import PropTypes from 'prop-types'
+import React from 'react'
+import { withRouter } from 'react-router-dom'
+import { connect } from 'react-redux'
+import { deleteBlog, likeBlog } from '../reducers/blogReducer'
+import { setNotification } from '../reducers/notificationReducer'
 
-const Blog = ({ blog, likeHandler, deleteHandler, user }) => {
-  const [visible, setVisible] = useState(false)
-  const [delVisible, setDelVisible] = useState(false)
-
-  const showWhenVisible = { display: visible ? '' : 'none' }
-
-  const showDelWhenVisible = { display: delVisible ? '' : 'none' }
-
-  const blogStyle = {
-    paddingTop: 10,
-    paddingLeft: 2,
-    border: 'solid',
-    borderWidth: 1,
-    marginBottom: 5
+const Blog = (props) => {
+  console.log('user:', props.user)
+  const deleteHandler = async (blog) => {
+    if (!window.confirm(`Do you really want to remove blog ${blog.title} by ${blog.author}?`)) {
+      return
+    }
+    try {
+      props.deleteBlog(blog.id)
+    } catch (exception) {
+      console.log(exception)
+    }
+    props.history.push('/')
+    props.setNotification(`blog ${blog.title} by ${blog.author} removed!`, 'error')
   }
 
-  const handleDelVisiblity = () => {
+  const likeHandler = async (blog) => {
     try {
-      // console.log(`blog user: ${blog.user.name}, user:`, user.name)
-      if (!blog.user || blog.user.name === user.name) {
-        setDelVisible(true)
-      }
+      const liked = props.blogs.find(b => b.id === blog.id)
+      props.likeBlog(liked)
+      props.setNotification(`blog ${liked.title} by ${liked.author} liked!`)
     } catch (exception) {
       console.log(exception)
     }
   }
 
-  const toggleVisibility = () => {
-    setVisible(!visible)
-    handleDelVisiblity()
-  }
-
-  Blog.propTypes = {
-    blog: PropTypes.object.isRequired,
-    likeHandler: PropTypes.func.isRequired,
-    deleteHandler: PropTypes.func.isRequired,
-    user: PropTypes.object.isRequired
+  if (props.blog === undefined) {
+    return null
   }
 
   return (
-    <div style={blogStyle}>
-      <div onClick={toggleVisibility}>
-        {blog.title} {blog.author}
-      </div>
-      <div style={showWhenVisible}>
-        <a href={blog.url} target='_blank' rel='noopener noreferrer'>{blog.url}</a><br />
-        {blog.likes} likes <button onClick={() => likeHandler(blog)}>like</button><br />
-        {blog.user ? `Added by ${blog.user.name}` : ''} <br />
-        <button style={showDelWhenVisible} onClick={() => deleteHandler(blog)}>remove</button>
-      </div>
+    <div>
+      <h2>{props.blog.title} {props.blog.author}</h2>
+      <a href={props.blog.url} target='_blank' rel='noopener noreferrer'>{props.blog.url}</a><br />
+      {props.blog.likes} likes
+      <button onClick={() => likeHandler(props.blog)}>like</button><br />
+      {props.blog.user ? `Added by ${props.blog.user.name}` : ''} <br />
+      {props.blog.user.username === props.user.username && (<button onClick={() => deleteHandler(props.blog)}>remove</button>)}
     </div>
-
   )
 }
 
-export default Blog
+const mapStateToProps = (state, ownProps) => {
+  return {
+    notification: state.notification,
+    blog: ownProps.blog,
+    blogs: state.blogs,
+    user: ownProps.user
+  }
+}
+
+const mapDispatchToProps = {
+  deleteBlog,
+  likeBlog,
+  setNotification,
+}
+
+export default withRouter(connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Blog))
