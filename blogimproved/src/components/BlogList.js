@@ -20,10 +20,10 @@ const BlogList = (props) => {
   const blogFormRef = React.createRef()
   return (
     <div>
+      <h2>blog app</h2>
       <Toggable buttonLabel="New Blog" ref={blogFormRef}>
         <NewBlog createBlog={createBlog} />
       </Toggable>
-      <h2>blogs</h2>
       {props.blogs.sort(byLikes).map(blog =>
         <BlogLink key={blog.id}
           blog={blog} />

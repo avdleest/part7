@@ -63,6 +63,10 @@ const App = (props) => {
 
   const blogById = (id) => props.blogs.find(blog => blog.id === id)
 
+  const navStyle = {
+    background: 'lightgrey'
+  }
+
   if (props.user === null) {
     return (
       <div>
@@ -86,14 +90,22 @@ const App = (props) => {
   return (
     <div>
       <Router>
-        <p>{props.user.name} logged in<button type="logout" onClick={handleLogout}>logout</button></p>
+        <div style={navStyle}>
+          <p>
+            <Link to='/'>Blogs</Link>
+            {'  '}
+            <Link to='/users'>Users</Link>
+            {'   '}
+            {props.user.name} logged in  <button type="logout" onClick={handleLogout}>logout</button>
+          </p>
+        </div>
         <Notification />
         <Route exact path='/' render={() => <BlogList />} />
         <Route exact path='/users' render={() => <Users />} />
         <Route exact path='/users/:id' render={({ match }) => <User user={userById(match.params.id)} />} />
         <Route exact path='/blogs/:id' render={({ match }) => <Blog user={props.user} blog={blogById(match.params.id)} />} />
-      </Router>
-    </div>
+      </Router >
+    </div >
   )
 }
 
