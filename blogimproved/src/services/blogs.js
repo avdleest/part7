@@ -41,5 +41,14 @@ const del = async (id) => {
   return response
 }
 
+const comment = async (id, comment) => {
+  const config = {
+    headers: { Authorization: token },
+  }
+  const response = await axios.put(`${baseUrl}/${id}/comments`, comment, config)
 
-export default { getAll, create, update, setToken, del }
+  return response
+}
+
+
+export default { getAll, create, update, setToken, del, comment }

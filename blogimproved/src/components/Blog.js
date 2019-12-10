@@ -1,10 +1,12 @@
 import React from 'react'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
-import { deleteBlog, likeBlog } from '../reducers/blogReducer'
+import { deleteBlog, likeBlog, commentBlog } from '../reducers/blogReducer'
 import { setNotification } from '../reducers/notificationReducer'
+import { useField } from '../hooks'
 
 const Blog = (props) => {
+  const [comment, resetComment] = useField('text')
   console.log('user:', props.user)
   const deleteHandler = async (blog) => {
     if (!window.confirm(`Do you really want to remove blog ${blog.title} by ${blog.author}?`)) {
@@ -29,6 +31,12 @@ const Blog = (props) => {
     }
   }
 
+  const handleComment = (event) => {
+    event.preventDefault()
+    props.commentBlog(props.blog.id, comment.value)
+    resetComment()
+  }
+
   if (props.blog === undefined) {
     return null
   }
@@ -41,6 +49,16 @@ const Blog = (props) => {
       <button onClick={() => likeHandler(props.blog)}>like</button><br />
       {props.blog.user ? `Added by ${props.blog.user.name}` : ''} <br />
       {props.blog.user.username === props.user.username && (<button onClick={() => deleteHandler(props.blog)}>remove</button>)}
+      <h2>Comments</h2>
+      <form onSubmit={handleComment}>
+        <input {...comment} />
+        <button type='submit'>add new comment</button>
+      </form>
+      <ul>
+        {props.blog.comments.map((comment, index) =>
+          <li key={index}>{comment}</li>
+        )}
+      </ul>
     </div>
   )
 }
@@ -57,6 +75,7 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = {
   deleteBlog,
   likeBlog,
+  commentBlog,
   setNotification,
 }
 
