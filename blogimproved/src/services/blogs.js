@@ -47,7 +47,7 @@ const comment = async (id, comment) => {
   }
   const response = await axios.put(`${baseUrl}/${id}/comments`, comment, config)
 
-  return response
+  return response.data
 }
 
 

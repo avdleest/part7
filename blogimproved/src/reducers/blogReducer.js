@@ -29,11 +29,19 @@ export const initializeBlogs = () => {
 
 export const createNewBlog = (content) => {
   return async (dispatch) => {
-    const data = await blogService.create(content)
-    dispatch({
-      type: 'NEW_BLOG',
-      data
-    })
+    try {
+      const data = await blogService.create(content)
+      dispatch({
+        type: 'NEW_BLOG',
+        data
+      })
+    } catch (exception) {
+      if (exception.response && exception.response.data.error) {
+        return `server error: ${exception.response.data.error}`
+      } else if (exception.message) {
+        return exception.message
+      }
+    }
   }
 }
 

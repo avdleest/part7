@@ -11,10 +11,12 @@ const BlogList = (props) => {
   const byLikes = (b1, b2) => b2.likes - b1.likes
 
   const createBlog = async (blog) => {
-    // TODO: check why the user is undefined directly after creating a blog. This poses problems for liking a blog
     blogFormRef.current.toggleVisibility()
-    props.createNewBlog(blog)
-    props.setNotification(`a new blog ${blog.title} by ${blog.author} added`)
+    // With the below method, the server can provide the error message for the notification
+    const response = await props.createNewBlog(blog)
+    response
+      ? props.setNotification(response, 'error')
+      : props.setNotification(`a new blog ${blog.title} by ${blog.author} added`)
   }
 
   const blogFormRef = React.createRef()
