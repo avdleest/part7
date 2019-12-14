@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
 import { BrowserRouter as Router, Route, Link, Redirect, withRouter } from 'react-router-dom'
+import { Container } from 'semantic-ui-react'
 import BlogList from './components/BlogList'
 import Notification from './components/Notification'
 import Users from './components/Users'
@@ -13,6 +14,7 @@ import { initializeBlogs } from './reducers/blogReducer'
 import { setNotification } from './reducers/notificationReducer'
 import { setUser, logoutUser } from './reducers/userReducer'
 import { initializeUsers } from './reducers/allUsersReducer'
+import { Menu, Button } from 'semantic-ui-react'
 
 
 const App = (props) => {
@@ -63,13 +65,9 @@ const App = (props) => {
 
   const blogById = (id) => props.blogs.find(blog => blog.id === id)
 
-  const navStyle = {
-    background: 'lightgrey'
-  }
-
   if (props.user === null) {
     return (
-      <div>
+      <Container>
         <h2>Login</h2>
 
         <form onSubmit={handleLogin}>
@@ -83,14 +81,20 @@ const App = (props) => {
           </div>
           <button type="submit">login</button>
         </form>
-      </div>
+      </Container>
     )
   }
 
   return (
-    <div>
+    <Container>
       <Router>
-        <div style={navStyle}>
+        <Menu>
+          <Menu.Item><Link to='/'>Blogs</Link></Menu.Item>
+          <Menu.Item><Link to='/users'>Users</Link></Menu.Item>
+          <Menu.Item>{'   '}{props.user.name} logged in {'   '}<Button basic size='tiny' type="logout" onClick={handleLogout}>logout</Button></Menu.Item>
+        </Menu>
+
+        {/* <div style={navStyle}>
           <p>
             <Link to='/'>Blogs</Link>
             {'  '}
@@ -98,14 +102,14 @@ const App = (props) => {
             {'   '}
             {props.user.name} logged in  <button type="logout" onClick={handleLogout}>logout</button>
           </p>
-        </div>
+        </div> */}
         <Notification />
         <Route exact path='/' render={() => <BlogList />} />
         <Route exact path='/users' render={() => <Users />} />
         <Route exact path='/users/:id' render={({ match }) => <User user={userById(match.params.id)} />} />
         <Route exact path='/blogs/:id' render={({ match }) => <Blog user={props.user} blog={blogById(match.params.id)} />} />
       </Router >
-    </div >
+    </Container>
   )
 }
 

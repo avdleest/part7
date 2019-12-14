@@ -1,4 +1,5 @@
 import React, { useState, useImperativeHandle } from 'react'
+import { Button } from 'semantic-ui-react'
 
 // eslint-disable-next-line react/display-name
 const Togglable = React.forwardRef((props, ref) => {
@@ -20,11 +21,12 @@ const Togglable = React.forwardRef((props, ref) => {
   return (
     <div>
       <div style={hideWhenVisible}>
-        <button onClick={toggleVisibility}>{props.buttonLabel}</button>
+        <Button color='green' onClick={toggleVisibility}>{props.buttonLabel}</Button>
       </div>
       <div style={showWhenVisible}>
         {props.children}
-        <button onClick={toggleVisibility}>cancel</button>
+        <br />
+        <Button negative compact onClick={toggleVisibility}>cancel</Button>
       </div>
     </div>
   )

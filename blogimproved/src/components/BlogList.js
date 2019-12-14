@@ -1,10 +1,12 @@
 import { connect } from 'react-redux'
 import React from 'react'
-import BlogLink from './BlogLink'
 import NewBlog from './NewBlog'
 import Toggable from './Toggable'
 import { createNewBlog } from '../reducers/blogReducer'
 import { setNotification } from '../reducers/notificationReducer'
+import { Table } from 'semantic-ui-react'
+import { Link } from 'react-router-dom'
+
 
 const BlogList = (props) => {
 
@@ -26,10 +28,17 @@ const BlogList = (props) => {
       <Toggable buttonLabel="New Blog" ref={blogFormRef}>
         <NewBlog createBlog={createBlog} />
       </Toggable>
-      {props.blogs.sort(byLikes).map(blog =>
-        <BlogLink key={blog.id}
-          blog={blog} />
-      )}
+      <Table striped selectable>
+        <Table.Body>
+          {props.blogs.sort(byLikes).map(blog =>
+            <Table.Row key={blog.id}>
+              <Table.Cell>
+                <Link to={`/blogs/${blog.id}`}>{blog.title} {blog.author}</Link>
+              </Table.Cell>
+            </Table.Row>
+          )}
+        </Table.Body>
+      </Table>
     </div>
   )
 }
